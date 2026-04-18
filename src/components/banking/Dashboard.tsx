@@ -15,7 +15,7 @@ import {
   rectSortingStrategy,
   sortableKeyboardCoordinates,
 } from "@dnd-kit/sortable";
-import { Bell, LogOut, Pencil, Check, Layers, Trash2, Gift, User, Moon } from "lucide-react";
+import { Bell, LogOut, Pencil, Check, Layers, Trash2, Gift, User, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -27,7 +27,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
-import type { BankingState, WidgetId } from "@/lib/banking/types";
+import type { BankingState, WidgetId, WidgetShape } from "@/lib/banking/types";
 import {
   applyLayout,
   deleteLayout,
@@ -35,6 +35,7 @@ import {
   saveLayout,
   saveState,
   setActiveWidgets,
+  setWidgetShape,
 } from "@/lib/banking/storage";
 import {
   applyTheme,
@@ -54,6 +55,7 @@ import { ThemePicker, getCustomThemeImage } from "./ThemePicker";
 import { DioneAssistant } from "./DioneAssistant";
 import { ThemeBackground } from "./ThemeBackground";
 import { SeasonalPopup } from "./SeasonalPopup";
+import { getThemeAccent } from "./WidgetCard";
 
 export function Dashboard({
   initial,
@@ -116,8 +118,13 @@ export function Dashboard({
     update(state.activeWidgets.filter((w) => w !== id));
   };
 
+  const handleShape = (id: WidgetId, shape: WidgetShape) => {
+    const next = setWidgetShape(id, shape);
+    setState(next);
+  };
+
   const handleSaveLayout = (name: string) => {
-    saveLayout(name, state.activeWidgets);
+    saveLayout(name, state.activeWidgets, state.widgetShapes);
     setState(loadState());
     toast.success(`Saved layout "${name}"`);
   };
@@ -140,6 +147,7 @@ export function Dashboard({
   const equippedBadge = state.lunar.badgesDisabled
     ? null
     : CHARITIES.find((c) => c.id === state.lunar.equippedBadge);
+  const accent = getThemeAccent(theme, holiday);
 
   return (
     <div className="relative min-h-screen bg-background">
@@ -158,11 +166,11 @@ export function Dashboard({
                 className="flex h-9 w-9 items-center justify-center rounded-lg text-primary-foreground"
                 style={{ background: "var(--gradient-primary)" }}
               >
-                <span className="text-sm font-bold">L</span>
+                <span className="text-sm font-bold">N</span>
               </div>
               <div>
                 <div className="flex items-center gap-1.5 text-sm font-semibold leading-tight">
-                  Lunar Bank
+                  Noctis Bank
                   {equippedBadge && (
                     <span title={equippedBadge.badgeLabel} className="text-base leading-none">
                       {equippedBadge.badgeEmoji}
@@ -244,10 +252,10 @@ export function Dashboard({
                 size="icon"
                 variant="outline"
                 onClick={() => navigate({ to: "/lunar" })}
-                aria-label="Lunar Points"
-                title="Lunar Points"
+                aria-label="Star Points"
+                title="Star Points"
               >
-                <Moon className="h-4 w-4" />
+                <Star className="h-4 w-4" />
               </Button>
 
               <Button size="icon" variant="ghost" aria-label="Notifications">
@@ -276,7 +284,7 @@ export function Dashboard({
                   Would you like to make any changes to your dashboard?
                 </div>
                 <div className="text-xs text-muted-foreground">
-                  Drag widgets to reorder, remove the ones you don't need, add new ones, or change your theme.
+                  Drag to reorder, tap a size button to resize each widget, add new ones, or change your theme.
                 </div>
               </div>
               <div className="flex flex-wrap items-center gap-2">
@@ -300,13 +308,17 @@ export function Dashboard({
 
           <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
             <SortableContext items={state.activeWidgets} strategy={rectSortingStrategy}>
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+              <div className="grid auto-rows-[minmax(13rem,auto)] grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
                 {state.activeWidgets.map((id) => (
                   <SortableWidget
                     key={id}
                     id={id}
                     editing={editing}
+                    shape={state.widgetShapes[id]}
                     onRemove={() => handleRemove(id)}
+                    onShapeChange={(s) => handleShape(id, s)}
+                    themeAccent={accent.icon}
+                    themeImage={accent.image}
                   />
                 ))}
               </div>
@@ -332,6 +344,7 @@ export function Dashboard({
         currentTheme={theme}
         callbacks={{
           onSetTheme: handleThemeChange,
+          onSetHoliday: handleHolidayChange,
           onToggleEdit: () => setEditing(true),
           onSaveLayout: () => {
             setEditing(true);
