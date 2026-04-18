@@ -22,8 +22,8 @@ import type { BankingState } from "@/lib/banking/types";
 export const Route = createFileRoute("/lunar")({
   head: () => ({
     meta: [
-      { title: "Lunar Points — Lunar Bank" },
-      { name: "description", content: "Earn Lunar Points through healthy spending, walking and donations to good causes." },
+      { title: "Star Points — Noctis Bank" },
+      { name: "description", content: "Earn Star Points through healthy spending, walking and donations to good causes." },
     ],
   }),
   component: LunarPage,
@@ -48,7 +48,7 @@ function LunarPage() {
     const next = addSteps(state, n);
     apply(next);
     const earned = next.lunar.points - before;
-    if (earned > 0) toast.success(`+${earned} LP for ${n} steps`);
+    if (earned > 0) toast.success(`+${earned} SP for ${n} steps`);
     else toast(`+${n} steps logged`);
   };
 
@@ -66,7 +66,7 @@ function LunarPage() {
     const def = CHARITIES.find((c) => c.id === id)!;
     const next = donateToCharity(state, id);
     apply(next);
-    toast.success(`Donated ${def.amount} kr — +${def.reward} LP and ${def.badgeLabel} unlocked`);
+    toast.success(`Donated ${def.amount} kr — +${def.reward} SP and ${def.badgeLabel} unlocked`);
   };
 
   const equip = (id: typeof CHARITIES[number]["id"] | null) => {
@@ -84,7 +84,7 @@ function LunarPage() {
           <Link to="/" className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground">
             <ArrowLeft className="h-4 w-4" /> Back to dashboard
           </Link>
-          <div className="text-sm font-semibold">Lunar Points</div>
+          <div className="text-sm font-semibold">Star Points</div>
           <div className="w-32" />
         </div>
       </header>
@@ -122,7 +122,7 @@ function BalanceCard({ points }: { points: number }) {
         </div>
         <div className="flex-1">
           <div className="text-sm uppercase tracking-wide opacity-80">Your balance</div>
-          <div className="text-4xl font-bold">{points.toLocaleString()} LP</div>
+          <div className="text-4xl font-bold">{points.toLocaleString()} SP</div>
           <div className="mt-1 text-sm opacity-90">
             Earn more with healthy spending, daily steps and giving back.
           </div>
@@ -144,7 +144,7 @@ function StepsCard({ steps, onLog }: { steps: number; onLog: (n: number) => void
         <div>
           <div className="text-sm font-semibold">Step counter</div>
           <div className="text-xs text-muted-foreground">
-            For every {STEP_CONSTANTS.STEPS_PER_AWARD.toLocaleString()} steps, you receive {STEP_CONSTANTS.POINTS_PER_AWARD} Lunar Points.
+            For every {STEP_CONSTANTS.STEPS_PER_AWARD.toLocaleString()} steps, you receive {STEP_CONSTANTS.POINTS_PER_AWARD} Star Points.
           </div>
         </div>
       </div>
@@ -186,7 +186,7 @@ function QuestsSection({ state, onClaim }: { state: BankingState; onClaim: (id: 
               {current ? (
                 <>
                   <div className="mt-2 text-sm font-medium">{current.tier.goal}</div>
-                  <div className="mt-2 text-2xl font-bold text-primary">+{current.tier.reward} LP</div>
+                  <div className="mt-2 text-2xl font-bold text-primary">+{current.tier.reward} SP</div>
                 </>
               ) : (
                 <div className="mt-2 text-sm text-muted-foreground">All tiers complete — incredible!</div>
@@ -221,7 +221,7 @@ function CharitiesSection({
         <h2 className="text-lg font-semibold">Donate to good causes</h2>
       </div>
       <p className="mb-3 text-sm text-muted-foreground">
-        Each donation gives you Lunar Points plus a special badge you can wear on your profile.
+        Each donation gives you Star Points plus a special badge you can wear on your profile.
       </p>
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
         {CHARITIES.map((c) => {
@@ -241,7 +241,7 @@ function CharitiesSection({
                 </div>
               </div>
               <p className="mb-3 text-xs text-muted-foreground">{c.description}</p>
-              <div className="mb-3 text-xs font-medium text-primary">+{c.reward} LP · {c.badgeLabel}</div>
+              <div className="mb-3 text-xs font-medium text-primary">+{c.reward} SP · {c.badgeLabel}</div>
               <Button size="sm" className="w-full gap-1.5" variant={have ? "outline" : "default"} onClick={() => onDonate(c.id)}>
                 <Plus className="h-3.5 w-3.5" />
                 {have ? "Donate again" : "Donate"}

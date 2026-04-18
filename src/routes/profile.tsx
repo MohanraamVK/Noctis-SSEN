@@ -37,7 +37,7 @@ import { QrScannerDialog } from "@/components/banking/QrScannerDialog";
 export const Route = createFileRoute("/profile")({
   head: () => ({
     meta: [
-      { title: "Your profile — Lunar Bank" },
+      { title: "Your profile — Noctis Bank" },
       { name: "description", content: "Update your details and manage your saved dashboard layouts." },
     ],
   }),

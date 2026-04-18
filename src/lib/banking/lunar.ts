@@ -266,8 +266,8 @@ export function removeCustomTheme(state: BankingState, id: string): BankingState
 
 export function getLunarPointsExplanation(): { text: string; action: string; link: string } {
   return {
-    text: "Lunar Points are earned by completing monthly financial quests, hitting savings milestones, and staying active. You can use them to unlock exclusive themes and badges.",
-    action: "Learn more about Lunar Points",
+    text: "Star Points are earned by completing monthly financial quests, hitting savings milestones, and staying active. You can use them to unlock exclusive themes and badges.",
+    action: "Learn more about Star Points",
     link: "/lunar"
   };
 }

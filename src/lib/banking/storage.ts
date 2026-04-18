@@ -1,4 +1,4 @@
-import type { BankingState, LunarState, SavedLayout, UserProfile, WidgetId } from "./types";
+import type { BankingState, LunarState, SavedLayout, UserProfile, WidgetId, WidgetShape } from "./types";
 import { DEFAULT_WIDGETS, WIDGET_CATALOG } from "./widgets";
 import { INITIAL_LUNAR } from "./lunar";
 
@@ -19,6 +19,7 @@ export const MOCK_PROFILE: UserProfile = {
 const initialState: BankingState = {
   profile: MOCK_PROFILE,
   activeWidgets: DEFAULT_WIDGETS,
+  widgetShapes: {},
   layouts: [],
   onboarded: false,
   lunar: INITIAL_LUNAR,
@@ -38,12 +39,18 @@ export function loadState(): BankingState {
     const raw = window.localStorage.getItem(KEY);
     if (!raw) return initialState;
     const parsed = JSON.parse(raw) as Partial<BankingState>;
-    const merged: BankingState = { ...initialState, ...parsed, lunar: mergeLunar(parsed.lunar) };
+    const merged: BankingState = {
+      ...initialState,
+      ...parsed,
+      widgetShapes: parsed.widgetShapes ?? {},
+      lunar: mergeLunar(parsed.lunar),
+    };
     merged.activeWidgets = cleanWidgets(merged.activeWidgets);
     if (merged.activeWidgets.length === 0) merged.activeWidgets = DEFAULT_WIDGETS;
     merged.layouts = (merged.layouts ?? []).map((l) => ({
       ...l,
       widgets: cleanWidgets(l.widgets),
+      shapes: l.shapes ?? {},
     }));
     return merged;
   } catch {
@@ -62,18 +69,29 @@ export function setActiveWidgets(widgets: WidgetId[]) {
   saveState(s);
 }
 
+export function setWidgetShape(id: WidgetId, shape: WidgetShape | undefined) {
+  const s = loadState();
+  const next = { ...s.widgetShapes };
+  if (!shape) delete next[id];
+  else next[id] = shape;
+  s.widgetShapes = next;
+  saveState(s);
+  return s;
+}
+
 export function setOnboarded(value: boolean) {
   const s = loadState();
   s.onboarded = value;
   saveState(s);
 }
 
-export function saveLayout(name: string, widgets: WidgetId[]): SavedLayout {
+export function saveLayout(name: string, widgets: WidgetId[], shapes?: SavedLayout["shapes"]): SavedLayout {
   const s = loadState();
   const layout: SavedLayout = {
     id: crypto.randomUUID(),
     name,
     widgets,
+    shapes: shapes ?? {},
     createdAt: Date.now(),
   };
   s.layouts = [layout, ...s.layouts];
@@ -92,6 +110,7 @@ export function applyLayout(id: string) {
   const layout = s.layouts.find((l) => l.id === id);
   if (!layout) return;
   s.activeWidgets = layout.widgets;
+  s.widgetShapes = layout.shapes ?? {};
   saveState(s);
 }
 
@@ -102,21 +121,21 @@ export function updateProfile(patch: Partial<UserProfile>) {
   return s.profile;
 }
 
-export function importLayout(name: string, widgets: WidgetId[]): SavedLayout {
-  return saveLayout(name, cleanWidgets(widgets));
+export function importLayout(name: string, widgets: WidgetId[], shapes?: SavedLayout["shapes"]): SavedLayout {
+  return saveLayout(name, cleanWidgets(widgets), shapes);
 }
 
 export function encodeLayout(layout: SavedLayout): string {
-  const payload = { v: 1, n: layout.name, w: layout.widgets };
+  const payload = { v: 1, n: layout.name, w: layout.widgets, s: layout.shapes ?? {} };
   return btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
 }
 
-export function decodeLayout(code: string): { name: string; widgets: WidgetId[] } | null {
+export function decodeLayout(code: string): { name: string; widgets: WidgetId[]; shapes: SavedLayout["shapes"] } | null {
   try {
     const json = decodeURIComponent(escape(atob(code.trim())));
-    const parsed = JSON.parse(json) as { v: number; n: string; w: WidgetId[] };
+    const parsed = JSON.parse(json) as { v: number; n: string; w: WidgetId[]; s?: SavedLayout["shapes"] };
     if (!parsed || parsed.v !== 1 || !Array.isArray(parsed.w)) return null;
-    return { name: parsed.n || "Imported layout", widgets: cleanWidgets(parsed.w) };
+    return { name: parsed.n || "Imported layout", widgets: cleanWidgets(parsed.w), shapes: parsed.s ?? {} };
   } catch {
     return null;
   }
