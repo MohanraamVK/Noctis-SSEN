@@ -179,7 +179,8 @@ export function claimQuest(state: BankingState, questId: string): BankingState {
 export function donateToCharity(state: BankingState, charityId: CharityId): BankingState {
   const def = CHARITIES.find((c) => c.id === charityId);
   if (!def) return state;
-  const lunar = ensureMonthlyReset(state.lunar);
+  let lunar = ensureMonthlyReset(state.lunar);
+  lunar = ensureMonthlyDonationsReset(lunar);
   const ownedBadges = lunar.ownedBadges.includes(charityId) ? lunar.ownedBadges : [...lunar.ownedBadges, charityId];
   return {
     ...state,
@@ -188,6 +189,11 @@ export function donateToCharity(state: BankingState, charityId: CharityId): Bank
       points: lunar.points + def.reward,
       ownedBadges,
       equippedBadge: lunar.equippedBadge ?? charityId,
+      monthlyDonations: {
+        monthKey: lunar.monthlyDonations.monthKey,
+        totalAmount: lunar.monthlyDonations.totalAmount + def.amount,
+        count: lunar.monthlyDonations.count + 1,
+      },
     },
   };
 }
