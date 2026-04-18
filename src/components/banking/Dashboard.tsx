@@ -348,6 +348,7 @@ export function Dashboard({
 
       <DioneAssistant
         currentTheme={theme}
+        activeWidgets={state.activeWidgets}
         callbacks={{
           onSetTheme: handleThemeChange,
           onSetHoliday: handleHolidayChange,
@@ -358,6 +359,22 @@ export function Dashboard({
           },
           onNavigate: (target) =>
             navigate({ to: target === "offers" ? "/offers" : target === "lunar" ? "/lunar" : "/profile" }),
+          onFindWidget: (id, present) => {
+            if (present) {
+              const el = document.getElementById(`widget-${id}`);
+              if (el) {
+                el.scrollIntoView({ behavior: "smooth", block: "center" });
+                el.classList.remove("dione-pulse");
+                // restart animation
+                void (el as HTMLElement).offsetWidth;
+                el.classList.add("dione-pulse");
+                setTimeout(() => el.classList.remove("dione-pulse"), 3200);
+              }
+            } else {
+              setEditing(true);
+              setTimeout(() => setAddOpen(true), 200);
+            }
+          },
         }}
       />
     </div>
