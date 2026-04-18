@@ -31,7 +31,7 @@ export function SeasonalPopup({ state, onChange, onApplyHoliday, onApplyTheme }:
     if (holiday && !dismissed.includes(holiday.key)) {
       setShow({
         title: `It's ${holiday.label}! 🎉`,
-        body: `A free ${holiday.label} animation is available right now — overlay it on your current theme.`,
+        body: `Free ${holiday.label} animations and a matching theme are available right now.`,
         cta: `Try ${holiday.label}`,
         key: holiday.key,
         onCta: () => onApplyHoliday(holiday.id as "christmas" | "easter" | "midsummer"),

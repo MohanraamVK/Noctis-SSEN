@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils";
 export const Route = createFileRoute("/offers")({
   head: () => ({
     meta: [
-      { title: "Offers & Promotions — Lunar Bank" },
+      { title: "Offers & Promotions — Noctis Bank" },
       { name: "description", content: "Personalized offers picked for you based on your spending and preferences." },
     ],
   }),
