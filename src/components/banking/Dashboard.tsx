@@ -70,6 +70,7 @@ export function Dashboard({
   const [theme, setTheme] = useState<ThemeId>("default");
   const [holiday, setHoliday] = useState<HolidayOverlayId>("none");
   const [saveOpen, setSaveOpen] = useState(false);
+  const [addOpen, setAddOpen] = useState(false);
 
   useEffect(() => {
     const t = getStoredTheme();
@@ -296,7 +297,12 @@ export function Dashboard({
                   onChangeTheme={handleThemeChange}
                   onChangeHoliday={handleHolidayChange}
                 />
-                <AddWidgetDialog active={state.activeWidgets} onAdd={handleAdd} />
+                <AddWidgetDialog
+                  active={state.activeWidgets}
+                  onAdd={handleAdd}
+                  open={addOpen}
+                  onOpenChange={setAddOpen}
+                />
                 <SaveLayoutDialog
                   onSave={handleSaveLayout}
                   open={saveOpen}
