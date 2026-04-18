@@ -453,6 +453,14 @@ function parseIntent(text: string): DioneAction | null {
     return { type: "help" };
   }
 
+  // 2.5) FIND WIDGET — strong-intent verbs short-circuit topic catch-alls below.
+  const findVerb = /(find|show|where|locate|take me to|jump to|scroll to|open my|see my|view my|go to my|i want to see|i wanna see|navigate to)/.test(lc);
+  const widgetWord = /\b(widget|tile|card|tracker|panel|section)\b/.test(lc);
+  const widgetMatch = matchWidget(lc);
+  if (widgetMatch && (findVerb || widgetWord)) {
+    return { type: "findWidget", id: widgetMatch };
+  }
+
   // 3) STAR POINTS / lunar
   if (/(star|lunar) ?points?|^points?\b|how.*(earn|get).*(point|sp|lp)|reward|sp balance/.test(lc)) {
     if (/(open|see|show|view|go to)/.test(lc)) return { type: "open", target: "lunar" };
