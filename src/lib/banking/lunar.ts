@@ -266,4 +266,3 @@ export function getLunarPointsExplanation(): { text: string; action: string; lin
   };
 }
 
-export const STEP_CONSTANTS = { STEPS_PER_AWARD, POINTS_PER_AWARD };
