@@ -49,12 +49,10 @@ const ICONS: Record<WidgetId, LucideIcon> = {
 
 function LunarWidget() {
   const [points, setPoints] = useState(0);
-  const [steps, setSteps] = useState(0);
   useEffect(() => {
     const tick = () => {
       const s = loadState();
       setPoints(s.lunar.points);
-      setSteps(s.lunar.steps);
     };
     tick();
     const i = setInterval(tick, 2000);
@@ -64,7 +62,7 @@ function LunarWidget() {
     <div>
       <div className="mb-1 text-sm text-muted-foreground">Your balance</div>
       <div className="text-2xl font-bold">⭐ {points.toLocaleString()} SP</div>
-      <div className="mt-2 text-xs text-muted-foreground">{steps.toLocaleString()} steps tracked</div>
+      <div className="mt-2 text-xs text-muted-foreground">Quests, donations & more</div>
       <div className="mt-3 text-xs text-primary">Tap to earn more →</div>
     </div>
   );

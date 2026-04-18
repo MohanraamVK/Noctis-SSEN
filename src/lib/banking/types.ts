@@ -67,13 +67,16 @@ export interface CustomTheme {
   createdAt: number;
 }
 
+export interface MonthlyDonations {
+  monthKey: string;
+  totalAmount: number;
+  count: number;
+}
+
 export interface LunarState {
   points: number;
-  steps: number;
-  lastStepClaimedAt: number;
-  /** Total steps already converted to points (so we only award new chunks). */
-  stepsClaimed: number;
   quests: Record<string, QuestProgress>;
+  monthlyDonations: MonthlyDonations;
   ownedThemes: string[]; // theme ids the user has paid for outside their natural window
   ownedBadges: BadgeId[];
   equippedBadge: BadgeId | null;

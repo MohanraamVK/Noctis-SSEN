@@ -1,15 +1,10 @@
 import type { BankingState, CharityId, LunarState, QuestProgress, BadgeId } from "./types";
 import { currentMonthKey } from "./seasons";
 
-const STEPS_PER_AWARD = 1000;
-const POINTS_PER_AWARD = 10;
-
 export const INITIAL_LUNAR: LunarState = {
   points: 0,
-  steps: 0,
-  lastStepClaimedAt: 0,
-  stepsClaimed: 0,
   quests: {},
+  monthlyDonations: { monthKey: currentMonthKey(), totalAmount: 0, count: 0 },
   ownedThemes: [],
   ownedBadges: [],
   equippedBadge: null,
@@ -149,22 +144,15 @@ export function questCurrentTier(progress: QuestProgress | undefined, def: Quest
   return { tier: def.tiers[idx], index: idx };
 }
 
-export function addSteps(state: BankingState, delta: number): BankingState {
-  const lunar = ensureMonthlyReset(state.lunar);
-  const newSteps = lunar.steps + delta;
-  const totalAwards = Math.floor(newSteps / STEPS_PER_AWARD);
-  const claimedAwards = Math.floor(lunar.stepsClaimed / STEPS_PER_AWARD);
-  const newAwards = Math.max(0, totalAwards - claimedAwards);
-  return {
-    ...state,
-    lunar: {
-      ...lunar,
-      steps: newSteps,
-      stepsClaimed: totalAwards * STEPS_PER_AWARD,
-      points: lunar.points + newAwards * POINTS_PER_AWARD,
-      lastStepClaimedAt: newAwards > 0 ? Date.now() : lunar.lastStepClaimedAt,
-    },
-  };
+export function ensureMonthlyDonationsReset(lunar: LunarState): LunarState {
+  const month = currentMonthKey();
+  if (lunar.monthlyDonations.monthKey === month) return lunar;
+  return { ...lunar, monthlyDonations: { monthKey: month, totalAmount: 0, count: 0 } };
+}
+
+export function questsCompletedThisMonth(lunar: LunarState): number {
+  const month = currentMonthKey();
+  return Object.values(lunar.quests).filter((q) => q.monthKey === month && q.claimedThisCycle).length;
 }
 
 export function claimQuest(state: BankingState, questId: string): BankingState {
@@ -191,7 +179,8 @@ export function claimQuest(state: BankingState, questId: string): BankingState {
 export function donateToCharity(state: BankingState, charityId: CharityId): BankingState {
   const def = CHARITIES.find((c) => c.id === charityId);
   if (!def) return state;
-  const lunar = ensureMonthlyReset(state.lunar);
+  let lunar = ensureMonthlyReset(state.lunar);
+  lunar = ensureMonthlyDonationsReset(lunar);
   const ownedBadges = lunar.ownedBadges.includes(charityId) ? lunar.ownedBadges : [...lunar.ownedBadges, charityId];
   return {
     ...state,
@@ -200,6 +189,11 @@ export function donateToCharity(state: BankingState, charityId: CharityId): Bank
       points: lunar.points + def.reward,
       ownedBadges,
       equippedBadge: lunar.equippedBadge ?? charityId,
+      monthlyDonations: {
+        monthKey: lunar.monthlyDonations.monthKey,
+        totalAmount: lunar.monthlyDonations.totalAmount + def.amount,
+        count: lunar.monthlyDonations.count + 1,
+      },
     },
   };
 }
@@ -272,4 +266,3 @@ export function getLunarPointsExplanation(): { text: string; action: string; lin
   };
 }
 
-export const STEP_CONSTANTS = { STEPS_PER_AWARD, POINTS_PER_AWARD };
