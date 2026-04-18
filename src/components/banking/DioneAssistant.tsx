@@ -523,18 +523,20 @@ void HOLIDAYS;
  * alias/title (longer matches win to avoid "income" hijacking "passive income").
  */
 function matchWidget(lc: string): WidgetId | null {
-  let best: { id: WidgetId; len: number } | null = null;
+  let bestId: WidgetId | null = null;
+  let bestLen = 0;
   (Object.keys(WIDGET_CATALOG) as WidgetId[]).forEach((id) => {
     const meta = WIDGET_CATALOG[id];
     const candidates = [meta.title.toLowerCase(), ...(WIDGET_ALIASES[id] ?? [])];
     for (const c of candidates) {
       if (c.length < 3) continue;
-      if (lc.includes(c) && (!best || c.length > best.len)) {
-        best = { id, len: c.length };
+      if (lc.includes(c) && c.length > bestLen) {
+        bestId = id;
+        bestLen = c.length;
       }
     }
   });
-  return best ? best.id : null;
+  return bestId;
 }
 
 function nextSlot() {
